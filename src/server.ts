@@ -13,6 +13,7 @@ dotenv.config();
 import dbConnect from "./config/database";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import logger from "./utils/logger";
+import { requestLogger } from "./middleware/requestLogger";
 
 // Import routes (these will be created later)
 // import authRoutes from './routes/auth';
@@ -50,24 +51,10 @@ app.use(
     credentials: true,
   })
 );
-
+app.use(requestLogger);
 // Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (res.statusCode >= 400) {
-      logger.warn(`${req.method} ${req.url} ${res.statusCode} - ${duration}ms`);
-    } else {
-      logger.info(`${req.method} ${req.url} ${res.statusCode} - ${duration}ms`);
-    }
-  });
-
-  next();
-});
 
 // Static files
 app.use("/uploads", express.static("uploads"));
@@ -91,7 +78,7 @@ app.get("/api/health", (req, res) => {
 
 // Error handling middleware
 app.use(notFound);
-// app.use(errorHandler);
+app.use(errorHandler);
 
 const PORT: number = parseInt(process.env.PORT || "5000", 10);
 
