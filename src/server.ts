@@ -16,9 +16,9 @@ import logger from "./utils/logger";
 import { requestLogger } from "./middleware/requestLogger";
 import { swaggerUi, swaggerSpec } from "./config/swagger";
 
-// Import routes (these will be created later)
-// import authRoutes from './routes/auth';
-// import userRoutes from './routes/user';
+// Import routes
+import authRoutes from './modules/auth/auth.routes';
+import userRoutes from './modules/user/user.routes';
 // import chatRoutes from './routes/chat';
 
 // Import socket handlers (this will be created later)
@@ -63,38 +63,12 @@ app.use("/uploads", express.static("uploads"));
 // Swagger API Documentation
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Routes (commented out until routes are created)
-// app.use('/api/auth', authRoutes);
-// app.use('/api/users', userRoutes);
-// app.use('/api/chat', chatRoutes);
+// API Routes
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
+// app.use('/api/v1/chat', chatRoutes);
 
-/**
- * @swagger
- * /api/health:
- *   get:
- *     summary: Health check endpoint
- *     description: Returns the current status of the API server
- *     tags: [Health]
- *     responses:
- *       200:
- *         description: API is healthy and running
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 status:
- *                   type: string
- *                   example: OK
- *                 message:
- *                   type: string
- *                   example: App is running
- *                 timestamp:
- *                   type: string
- *                   format: date-time
- *                   example: 2025-01-21T12:30:00.000Z
- */
-app.get("/api/health", (req, res) => {
+app.get("/health", (req, res) => {
   res.status(200).json({
     status: "OK",
     message: "App is running",
