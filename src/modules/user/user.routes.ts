@@ -1,48 +1,14 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
-import { authenticateToken, optionalAuth } from "../../middleware/auth.middleware";
-import { body } from "express-validator";
+import {
+  authenticateToken,
+  optionalAuth,
+} from "../../middleware/auth.middleware";
 import { validateRequest } from "../../middleware/validation.middleware";
+import { catchAsync } from "../../utils/catchAsync";
+import { updateProfileValidator } from "./user.validation";
 
 const router: Router = Router();
-
-/**
- * @swagger
- * /users/{id}:
- *   get:
- *     summary: Get user by ID
- *     description: Get a user's profile by their ID
- *     tags: [Users]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *         description: User ID
- *     responses:
- *       200:
- *         description: User profile retrieved successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: true
- *                 message:
- *                   type: string
- *                   example: User profile retrieved successfully
- *                 data:
- *                   type: object
- *                   properties:
- *                     user:
- *                       $ref: '#/components/schemas/User'
- *       404:
- *         $ref: '#/components/schemas/Error'
- */
-router.get("/:id", UserController.getUserById);
 
 /**
  * @swagger
@@ -97,29 +63,9 @@ router.get("/:id", UserController.getUserById);
 router.put(
   "/profile",
   authenticateToken,
-  [
-    body("username")
-      .optional()
-      .isLength({ min: 3, max: 20 })
-      .withMessage("Username must be between 3 and 20 characters")
-      .matches(/^[a-zA-Z0-9_]+$/)
-      .withMessage("Username can only contain letters, numbers, and underscores"),
-    body("name")
-      .optional()
-      .isLength({ min: 2, max: 50 })
-      .withMessage("Name must be between 2 and 50 characters")
-      .trim(),
-    body("avatar")
-      .optional()
-      .isURL()
-      .withMessage("Avatar must be a valid URL"),
-    body("bio")
-      .optional()
-      .isLength({ max: 500 })
-      .withMessage("Bio cannot exceed 500 characters")
-  ],
+  updateProfileValidator,
   validateRequest,
-  UserController.updateProfile
+  catchAsync(UserController.updateProfile)
 );
 
 /**
@@ -148,7 +94,11 @@ router.put(
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.delete("/profile", authenticateToken, UserController.deleteAccount);
+router.delete(
+  "/profile",
+  authenticateToken,
+  catchAsync(UserController.deleteAccount)
+);
 
 /**
  * @swagger
@@ -179,7 +129,7 @@ router.delete("/profile", authenticateToken, UserController.deleteAccount);
  *                       items:
  *                         $ref: '#/components/schemas/User'
  */
-router.get("/online", UserController.getOnlineUsers);
+router.get("/online", catchAsync(UserController.getOnlineUsers));
 
 /**
  * @swagger
@@ -235,7 +185,7 @@ router.get("/online", UserController.getOnlineUsers);
  *                       type: integer
  *                       example: 1
  */
-router.get("/", UserController.getAllUsers);
+router.get("/", catchAsync(UserController.getAllUsers));
 
 /**
  * @swagger
@@ -273,6 +223,44 @@ router.get("/", UserController.getAllUsers);
  *                       items:
  *                         $ref: '#/components/schemas/User'
  */
-router.get("/search", UserController.searchUsers);
+router.get("/search", catchAsync(UserController.searchUsers));
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   get:
+ *     summary: Get user by ID
+ *     description: Get a user's profile by their ID
+ *     tags: [Users]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: User profile retrieved successfully
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     user:
+ *                       $ref: '#/components/schemas/User'
+ *       404:
+ *         $ref: '#/components/schemas/Error'
+ */
+router.get("/:id", catchAsync(UserController.getUserById));
 
 export default router;

@@ -1,14 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { AuthService } from "../modules/auth/auth.service";
 import { UserService } from "../modules/user/user.service";
-import { IUser } from "../modules/user/user.types";
 import logger from "../utils/logger";
+import { IAuthRequest } from "@/modules/auth/auth.types";
 
 /**
  * Middleware to authenticate JWT token
  */
 export const authenticateToken = async (
-  req: Request,
+  req: IAuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
@@ -66,7 +66,7 @@ export const authenticateToken = async (
  * Optional authentication middleware (doesn't fail if no token)
  */
 export const optionalAuth = async (
-  req: Request,
+  req: IAuthRequest,
   res: Response,
   next: NextFunction
 ): Promise<void> => {

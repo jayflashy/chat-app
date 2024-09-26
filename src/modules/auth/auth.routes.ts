@@ -1,9 +1,9 @@
-import { Router, Response } from "express";
-import { IAuthRequest } from "./auth.types";
+import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { authenticateToken } from "../../middleware/auth.middleware";
-import { body } from "express-validator";
 import { validateRequest } from "../../middleware/validation.middleware";
+import { catchAsync } from "../../utils/catchAsync";
+import { loginValidator, registerValidator } from "./auth.validation";
 
 const router: Router = Router();
 
@@ -76,41 +76,9 @@ const router: Router = Router();
  */
 router.post(
   "/register",
-  [
-    body("username")
-      .isLength({ min: 3, max: 20 })
-      .withMessage("Username must be between 3 and 20 characters")
-      .matches(/^[a-zA-Z0-9_]+$/)
-      .withMessage("Username can only contain letters, numbers, and underscores"),
-    body("email")
-      .isEmail()
-      .withMessage("Please provide a valid email address")
-      .normalizeEmail(),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long"),
-    body("confirmPassword")
-      .custom((value, { req }) => {
-        if (value !== req.body.password) {
-          throw new Error("Passwords do not match");
-        }
-        return true;
-      }),
-    body("name")
-      .isLength({ min: 2, max: 50 })
-      .withMessage("Name must be between 2 and 50 characters")
-      .trim(),
-    body("avatar")
-      .optional()
-      .isURL()
-      .withMessage("Avatar must be a valid URL"),
-    body("bio")
-      .optional()
-      .isLength({ max: 500 })
-      .withMessage("Bio cannot exceed 500 characters")
-  ],
+  registerValidator,
   validateRequest,
-  AuthController.register
+  catchAsync(AuthController.register)
 );
 
 /**
@@ -164,17 +132,9 @@ router.post(
  */
 router.post(
   "/login",
-  [
-    body("email")
-      .isEmail()
-      .withMessage("Please provide a valid email address")
-      .normalizeEmail(),
-    body("password")
-      .notEmpty()
-      .withMessage("Password is required")
-  ],
+  loginValidator,
   validateRequest,
-  AuthController.login
+  catchAsync(AuthController.login)
 );
 
 /**
@@ -203,7 +163,7 @@ router.post(
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.post("/logout", authenticateToken, AuthController.logout);
+router.post("/logout", authenticateToken, catchAsync(AuthController.logout));
 
 /**
  * @swagger
@@ -236,7 +196,7 @@ router.post("/logout", authenticateToken, AuthController.logout);
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.get("/me", authenticateToken, AuthController.getCurrentUser);
+router.get("/me", authenticateToken, catchAsync(AuthController.getCurrentUser));
 
 /**
  * @swagger
@@ -267,6 +227,10 @@ router.get("/me", authenticateToken, AuthController.getCurrentUser);
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.post("/refresh", authenticateToken, AuthController.refreshToken);
+router.post(
+  "/refresh",
+  authenticateToken,
+  catchAsync(AuthController.refreshToken)
+);
 
 export default router;

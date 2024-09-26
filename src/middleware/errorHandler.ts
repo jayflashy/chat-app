@@ -1,35 +1,41 @@
 import { Request, Response, NextFunction } from "express";
 import logger from "../utils/logger";
+import { AppError, NotFoundError } from "../utils/AppError";
 
-// 404 Not Found handler
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
-  const error = new Error(`Not found - ${req.originalUrl}`);
-  res.status(404).json({
-    message: error.message,
-  });
+  const error = new NotFoundError(`Not found - ${req.originalUrl}`);
+  next(error);
 };
 
-// Global error handler
 export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  // Default to 500 if status code wasn't set
-  const statusCode = res.statusCode !== 200 ? res.statusCode : 500;
+  let error = { ...err, message: err.message };
+  let statusCode = 500;
 
-  // Log the error
+  if (error instanceof AppError) {
+    statusCode = error.statusCode;
+  }
+
   logger.error({
-    message: err.message,
+    message: error.message,
     url: req.originalUrl,
     method: req.method,
-    statusCode,
-    stack: err.stack,
+    statusCode: statusCode,
+    stack: error.stack,
   });
 
+  let clientMessage = "Something went wrong. Please try again later.";
+  if (error instanceof AppError && error.isOperational) {
+    clientMessage = error.message;
+  }
+
   res.status(statusCode).json({
-    message: err.message,
-    // ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    success: false,
+    error: clientMessage,
+    timestamp: new Date().toISOString(),
   });
 };
