@@ -14,6 +14,7 @@ import dbConnect from "./config/database";
 import { errorHandler, notFound } from "./middleware/errorHandler";
 import logger from "./utils/logger";
 import { requestLogger } from "./middleware/requestLogger";
+import { swaggerUi, swaggerSpec } from "./config/swagger";
 
 // Import routes (these will be created later)
 // import authRoutes from './routes/auth';
@@ -51,24 +52,52 @@ app.use(
     credentials: true,
   })
 );
+app.use(cors());
 app.use(requestLogger);
-// Body parsing middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use("/uploads", express.static("uploads"));
 
+// Swagger API Documentation
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 // Routes (commented out until routes are created)
 // app.use('/api/auth', authRoutes);
 // app.use('/api/users', userRoutes);
 // app.use('/api/chat', chatRoutes);
 
-// Health check endpoint
+/**
+ * @swagger
+ * /api/health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Returns the current status of the API server
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: API is healthy and running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: OK
+ *                 message:
+ *                   type: string
+ *                   example: App is running
+ *                 timestamp:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2025-01-21T12:30:00.000Z
+ */
 app.get("/api/health", (req, res) => {
   res.status(200).json({
     status: "OK",
-    message: "Chat App Backend is running",
+    message: "App is running",
     timestamp: new Date().toISOString(),
   });
 });
@@ -80,7 +109,7 @@ app.get("/api/health", (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT: number = parseInt(process.env.PORT || "5000", 10);
+const PORT: number = parseInt(process.env.PORT || "8090", 10);
 
 server.listen(PORT, async () => {
   logger.info(`Server running on port http://localhost:${PORT}`);
