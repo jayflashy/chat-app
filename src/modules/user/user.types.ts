@@ -1,4 +1,4 @@
-import { Document } from "mongoose";
+import type { Document } from 'mongoose';
 
 export interface IUser extends Document {
   _id: string;
@@ -13,7 +13,7 @@ export interface IUser extends Document {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Methods
   comparePassword(candidatePassword: string): Promise<boolean>;
   updateLastSeen(): Promise<IUser>;

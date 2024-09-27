@@ -1,9 +1,14 @@
-import { Response } from 'express';
-import { ChatService } from './chat.service';
-import { CreateChatDto } from './chat.interface';
+import type { Response } from 'express';
 import { Types } from 'mongoose';
-import { IAuthRequest } from '../../modules/auth/auth.types';
-import { AuthenticationError, BadRequestError, NotFoundError } from '../../utils/AppError';
+
+import type { CreateChatDto } from './chat.interface';
+import { ChatService } from './chat.service';
+import type { IAuthRequest } from '../../modules/auth/auth.types';
+import {
+  AuthenticationError,
+  BadRequestError,
+  NotFoundError,
+} from '../../utils/AppError';
 
 export class ChatController {
   /**
@@ -17,14 +22,16 @@ export class ChatController {
       throw new AuthenticationError('Unauthorized');
     }
 
-    const allParticipants = [...new Set([...(participants || []), userId.toString()])];
+    const allParticipants = [
+      ...new Set([...(participants || []), userId.toString()]),
+    ];
 
     const createChatDto: CreateChatDto = {
       type,
       participants: allParticipants,
       name,
       description,
-      createdBy: userId.toString()
+      createdBy: userId.toString(),
     };
 
     const chat = await ChatService.createChat(createChatDto);
@@ -32,7 +39,7 @@ export class ChatController {
     res.status(201).json({
       success: true,
       message: 'Chat created successfully',
-      data: chat
+      data: chat,
     });
   }
 
@@ -51,7 +58,7 @@ export class ChatController {
     res.status(200).json({
       success: true,
       message: 'Chats fetched successfully',
-      data: chats
+      data: chats,
     });
   }
 
@@ -79,7 +86,7 @@ export class ChatController {
     res.status(200).json({
       success: true,
       message: 'Chat fetched successfully',
-      data: chat
+      data: chat,
     });
   }
 }

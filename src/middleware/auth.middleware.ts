@@ -1,8 +1,11 @@
-import { Request, Response, NextFunction } from "express";
-import { AuthService } from "../modules/auth/auth.service";
-import { UserService } from "../modules/user/user.service";
-import logger from "../utils/logger";
-import { IAuthRequest } from "@/modules/auth/auth.types";
+import type { Response, NextFunction } from 'express';
+import { Request } from 'express';
+
+import { AuthService } from '../modules/auth/auth.service';
+import { UserService } from '../modules/user/user.service';
+import logger from '../utils/logger';
+
+import type { IAuthRequest } from '@/modules/auth/auth.types';
 
 /**
  * Middleware to authenticate JWT token
@@ -10,16 +13,16 @@ import { IAuthRequest } from "@/modules/auth/auth.types";
 export const authenticateToken = async (
   req: IAuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
       res.status(401).json({
         success: false,
-        error: "Access token required",
+        error: 'Access token required',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -33,7 +36,7 @@ export const authenticateToken = async (
     if (!user) {
       res.status(401).json({
         success: false,
-        error: "User not found",
+        error: 'User not found',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -43,7 +46,7 @@ export const authenticateToken = async (
     if (!user.isActive) {
       res.status(401).json({
         success: false,
-        error: "Account is deactivated",
+        error: 'Account is deactivated',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -56,7 +59,7 @@ export const authenticateToken = async (
     logger.error(`Authentication error: ${error}`);
     res.status(401).json({
       success: false,
-      error: "Invalid or expired token",
+      error: 'Invalid or expired token',
       timestamp: new Date().toISOString(),
     });
   }
@@ -68,11 +71,11 @@ export const authenticateToken = async (
 export const optionalAuth = async (
   req: IAuthRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
+    const token = authHeader && authHeader.split(' ')[1];
 
     if (token) {
       const payload = AuthService.verifyToken(token);

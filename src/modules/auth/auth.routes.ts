@@ -1,9 +1,10 @@
-import { Router } from "express";
-import { AuthController } from "./auth.controller";
-import { authenticateToken } from "../../middleware/auth.middleware";
-import { validateRequest } from "../../middleware/validation.middleware";
-import { catchAsync } from "../../utils/catchAsync";
-import { loginValidator, registerValidator } from "./auth.validation";
+import { Router } from 'express';
+
+import { AuthController } from './auth.controller';
+import { loginValidator, registerValidator } from './auth.validation';
+import { authenticateToken } from '../../middleware/auth.middleware';
+import { validateRequest } from '../../middleware/validation.middleware';
+import { catchAsync } from '../../utils/catchAsync';
 
 const router: Router = Router();
 
@@ -75,10 +76,10 @@ const router: Router = Router();
  *         $ref: '#/components/schemas/Error'
  */
 router.post(
-  "/register",
+  '/register',
   registerValidator,
   validateRequest,
-  catchAsync(AuthController.register)
+  catchAsync(AuthController.register),
 );
 
 /**
@@ -131,10 +132,10 @@ router.post(
  *         $ref: '#/components/schemas/Error'
  */
 router.post(
-  "/login",
+  '/login',
   loginValidator,
   validateRequest,
-  catchAsync(AuthController.login)
+  catchAsync(AuthController.login),
 );
 
 /**
@@ -163,7 +164,7 @@ router.post(
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.post("/logout", authenticateToken, catchAsync(AuthController.logout));
+router.post('/logout', authenticateToken, catchAsync(AuthController.logout));
 
 /**
  * @swagger
@@ -196,7 +197,7 @@ router.post("/logout", authenticateToken, catchAsync(AuthController.logout));
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.get("/me", authenticateToken, catchAsync(AuthController.getCurrentUser));
+router.get('/me', authenticateToken, catchAsync(AuthController.getCurrentUser));
 
 /**
  * @swagger
@@ -228,9 +229,9 @@ router.get("/me", authenticateToken, catchAsync(AuthController.getCurrentUser));
  *         $ref: '#/components/schemas/Error'
  */
 router.post(
-  "/refresh",
+  '/refresh',
   authenticateToken,
-  catchAsync(AuthController.refreshToken)
+  catchAsync(AuthController.refreshToken),
 );
 
 export default router;

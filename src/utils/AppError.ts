@@ -5,7 +5,7 @@ export class AppError extends Error {
   constructor(
     message: string,
     statusCode: number,
-    isOperational: boolean = true
+    isOperational: boolean = true,
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -18,29 +18,33 @@ export class AppError extends Error {
 
 // Specific Error Types
 export class BadRequestError extends AppError {
-  constructor(message: string = "Bad Request") {
+  constructor(message: string = 'Bad Request') {
     super(message, 400);
   }
 }
 
 export class AuthenticationError extends AppError {
-  constructor(message: string = "Authentication Failed") {
+  constructor(message: string = 'Authentication Failed') {
     super(message, 401);
   }
 }
 
 export class NotFoundError extends AppError {
-  constructor(message: string = "Not Found") {
+  constructor(message: string = 'Not Found') {
     super(message, 404);
   }
 }
 
 // Validation Error that carries structured details
 export class ValidationError extends AppError {
-  public readonly details: Array<{ field: string; message: string; value?: unknown }>;
+  public readonly details: Array<{
+    field: string;
+    message: string;
+    value?: unknown;
+  }>;
   constructor(
     details: Array<{ field: string; message: string; value?: unknown }>,
-    message: string = "Validation failed"
+    message: string = 'Validation failed',
   ) {
     super(message, 422, true);
     this.details = details;
@@ -49,7 +53,11 @@ export class ValidationError extends AppError {
 
 // Generic HTTP error convenience when you want to specify any status code
 export class HttpError extends AppError {
-  constructor(message: string, statusCode: number, isOperational: boolean = true) {
+  constructor(
+    message: string,
+    statusCode: number,
+    isOperational: boolean = true,
+  ) {
     super(message, statusCode, isOperational);
   }
 }

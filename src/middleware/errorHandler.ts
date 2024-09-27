@@ -1,6 +1,7 @@
-import { Request, Response, NextFunction } from "express";
-import logger from "../utils/logger";
-import { AppError, NotFoundError, ValidationError } from "../utils/AppError";
+import type { Request, Response, NextFunction } from 'express';
+
+import { AppError, NotFoundError, ValidationError } from '../utils/AppError';
+import logger from '../utils/logger';
 
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
   const error = new NotFoundError(`Not found - ${req.originalUrl}`);
@@ -11,11 +12,11 @@ export const errorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   const error = err;
   let statusCode = 500;
-  
+
   if (error instanceof AppError) {
     statusCode = error.statusCode;
   }
@@ -28,7 +29,7 @@ export const errorHandler = (
     stack: error.stack,
   });
 
-  let clientMessage = "Something went wrong. Please try again later.";
+  let clientMessage = 'Something went wrong. Please try again later.';
   if (error instanceof AppError && error.isOperational) {
     clientMessage = error.message;
   }

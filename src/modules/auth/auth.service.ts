@@ -1,14 +1,15 @@
-import jwt from "jsonwebtoken";
-import { UserService } from "../user/user.service";
-import {
+import jwt from 'jsonwebtoken';
+
+import type {
   ILoginRequest,
   IRegisterRequest,
   IAuthResponse,
   IAuthPayload,
-} from "./auth.types";
-import { IUserInput } from "../user/user.types";
-import logger from "../../utils/logger";
-import { BadRequestError, ValidationError } from "../../utils/AppError";
+} from './auth.types';
+import { BadRequestError, ValidationError } from '../../utils/AppError';
+import logger from '../../utils/logger';
+import { UserService } from '../user/user.service';
+import type { IUserInput } from '../user/user.types';
 
 export class AuthService {
   /**
@@ -20,21 +21,21 @@ export class AuthService {
 
       // Check if passwords match
       if (userData.password !== confirmPassword) {
-        throw new Error("Passwords do not match");
+        throw new Error('Passwords do not match');
       }
 
       // Check if email already exists
       const emailExists = await UserService.emailExists(userData.email);
       if (emailExists) {
-        throw new BadRequestError("Email already exists");
+        throw new BadRequestError('Email already exists');
       }
 
       // Check if username already exists
       const usernameExists = await UserService.usernameExists(
-        userData.username
+        userData.username,
       );
       if (usernameExists) {
-        throw new BadRequestError("Username already exists");
+        throw new BadRequestError('Username already exists');
       }
 
       // Create user
@@ -51,7 +52,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "User registered successfully",
+        message: 'User registered successfully',
         data: {
           user,
           token,
@@ -73,18 +74,18 @@ export class AuthService {
       // Find user with password
       const user = await UserService.findByEmailWithPassword(email);
       if (!user) {
-        throw new Error("Invalid email or password");
+        throw new Error('Invalid email or password');
       }
 
       // Check if user is active
       if (!user.isActive) {
-        throw new Error("Account is deactivated");
+        throw new Error('Account is deactivated');
       }
 
       // Verify password
       const isPasswordValid = await user.comparePassword(password);
       if (!isPasswordValid) {
-        throw new Error("Invalid email or password");
+        throw new Error('Invalid email or password');
       }
 
       // Update online status
@@ -101,7 +102,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Login successful",
+        message: 'Login successful',
         data: {
           user,
           token,
@@ -117,7 +118,7 @@ export class AuthService {
    * Logout user
    */
   static async logout(
-    userId: string
+    userId: string,
   ): Promise<{ success: boolean; message: string }> {
     try {
       // Update online status to false
@@ -127,7 +128,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Logout successful",
+        message: 'Logout successful',
       };
     } catch (error) {
       logger.error(`Logout error: ${error}`);
@@ -142,12 +143,12 @@ export class AuthService {
     try {
       const user = await UserService.findById(userId);
       if (!user) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       return {
         success: true,
-        message: "User profile retrieved successfully",
+        message: 'User profile retrieved successfully',
         data: { user },
       };
     } catch (error) {
@@ -162,10 +163,10 @@ export class AuthService {
   static generateToken(payload: IAuthPayload): string {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      throw new Error("JWT_SECRET is not defined");
+      throw new Error('JWT_SECRET is not defined');
     }
 
-    const expiresIn = process.env.JWT_EXPIRE || "7d";
+    const expiresIn = process.env.JWT_EXPIRE || '7d';
 
     return jwt.sign(payload, secret, { expiresIn });
   }
@@ -176,13 +177,13 @@ export class AuthService {
   static verifyToken(token: string): IAuthPayload {
     const secret = process.env.JWT_SECRET;
     if (!secret) {
-      throw new Error("JWT_SECRET is not defined");
+      throw new Error('JWT_SECRET is not defined');
     }
 
     try {
       return jwt.verify(token, secret) as IAuthPayload;
     } catch (error) {
-      throw new Error("Invalid or expired token");
+      throw new Error('Invalid or expired token');
     }
   }
 
@@ -190,12 +191,12 @@ export class AuthService {
    * Refresh token (generate new token with same payload)
    */
   static async refreshToken(
-    userId: string
+    userId: string,
   ): Promise<{ success: boolean; data: { token: string } }> {
     try {
       const user = await UserService.findById(userId);
       if (!user) {
-        throw new Error("User not found");
+        throw new Error('User not found');
       }
 
       const token = this.generateToken({

@@ -1,6 +1,6 @@
-import User from "./user.model";
-import { IUser, IUserInput, IUserUpdate } from "./user.types";
-import logger from "../../utils/logger";
+import User from './user.model';
+import type { IUser, IUserInput, IUserUpdate } from './user.types';
+import logger from '../../utils/logger';
 
 export class UserService {
   /**
@@ -62,7 +62,9 @@ export class UserService {
    */
   static async findByIdWithPassword(id: string): Promise<IUser | null> {
     try {
-      const user = await User.findOne({ _id: id, isActive: true }).select("+password");
+      const user = await User.findOne({ _id: id, isActive: true }).select(
+        '+password',
+      );
       return user;
     } catch (error) {
       logger.error(`Error finding user by ID with password: ${error}`);
@@ -75,7 +77,9 @@ export class UserService {
    */
   static async findByEmailWithPassword(email: string): Promise<IUser | null> {
     try {
-      const user = await User.findOne({ email, isActive: true }).select("+password");
+      const user = await User.findOne({ email, isActive: true }).select(
+        '+password',
+      );
       return user;
     } catch (error) {
       logger.error(`Error finding user by email with password: ${error}`);
@@ -86,12 +90,18 @@ export class UserService {
   /**
    * Update user
    */
-  static async updateUser(id: string, updateData: IUserUpdate): Promise<IUser | null> {
+  static async updateUser(
+    id: string,
+    updateData: IUserUpdate,
+  ): Promise<IUser | null> {
     try {
       const user = await User.findOneAndUpdate(
         { _id: id, isActive: true },
         updateData,
-        { new: true, runValidators: true }
+        {
+          new: true,
+          runValidators: true,
+        },
       );
       if (user) {
         logger.info(`User updated: ${user.email}`);
@@ -111,7 +121,7 @@ export class UserService {
       const user = await User.findOneAndUpdate(
         { _id: id, isActive: true },
         { isActive: false },
-        { new: true }
+        { new: true },
       );
       if (user) {
         logger.info(`User deleted: ${user.email}`);
@@ -129,7 +139,7 @@ export class UserService {
   static async getOnlineUsers(): Promise<IUser[]> {
     try {
       const users = await User.find({ isOnline: true, isActive: true })
-        .select("-password")
+        .select('-password')
         .sort({ lastSeen: -1 });
       return users;
     } catch (error) {
@@ -141,7 +151,10 @@ export class UserService {
   /**
    * Get all users (paginated)
    */
-  static async getAllUsers(page: number = 1, limit: number = 10): Promise<{
+  static async getAllUsers(
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{
     users: IUser[];
     total: number;
     pages: number;
@@ -151,18 +164,18 @@ export class UserService {
       const skip = (page - 1) * limit;
       const [users, total] = await Promise.all([
         User.find({ isActive: true })
-          .select("-password")
+          .select('-password')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(limit),
-        User.countDocuments({ isActive: true })
+        User.countDocuments({ isActive: true }),
       ]);
 
       return {
         users,
         total,
         pages: Math.ceil(total / limit),
-        currentPage: page
+        currentPage: page,
       };
     } catch (error) {
       logger.error(`Error getting all users: ${error}`);
@@ -199,7 +212,10 @@ export class UserService {
   /**
    * Update user's online status
    */
-  static async updateOnlineStatus(id: string, isOnline: boolean): Promise<IUser | null> {
+  static async updateOnlineStatus(
+    id: string,
+    isOnline: boolean,
+  ): Promise<IUser | null> {
     try {
       const user = await User.findById(id);
       if (user) {

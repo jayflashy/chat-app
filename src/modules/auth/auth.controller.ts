@@ -1,6 +1,11 @@
-import { Response } from "express";
-import { AuthService } from "./auth.service";
-import { IAuthRequest, ILoginRequest, IRegisterRequest } from "./auth.types";
+import type { Response } from 'express';
+
+import { AuthService } from './auth.service';
+import type {
+  IAuthRequest,
+  ILoginRequest,
+  IRegisterRequest,
+} from './auth.types';
 
 export class AuthController {
   /**
@@ -33,7 +38,7 @@ export class AuthController {
     if (!userId) {
       res.status(401).json({
         success: false,
-        error: "User not authenticated",
+        error: 'User not authenticated',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -52,7 +57,7 @@ export class AuthController {
     if (!userId) {
       res.status(401).json({
         success: false,
-        error: "User not authenticated",
+        error: 'User not authenticated',
         timestamp: new Date().toISOString(),
       });
       return;
@@ -71,7 +76,7 @@ export class AuthController {
     if (!userId) {
       res.status(401).json({
         success: false,
-        error: "User not authenticated",
+        error: 'User not authenticated',
         timestamp: new Date().toISOString(),
       });
       return;

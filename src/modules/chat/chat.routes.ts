@@ -1,9 +1,10 @@
-import { Router } from "express";
-import { ChatController } from "./chat.controller";
-import { authenticateToken } from "../../middleware/auth.middleware";
-import { validateRequest } from "../../middleware/validation.middleware";
-import { catchAsync } from "../../utils/catchAsync";
-import { createChatValidator, chatIdParamValidator } from "./chat.validation";
+import { Router } from 'express';
+
+import { ChatController } from './chat.controller';
+import { createChatValidator, chatIdParamValidator } from './chat.validation';
+import { authenticateToken } from '../../middleware/auth.middleware';
+import { validateRequest } from '../../middleware/validation.middleware';
+import { catchAsync } from '../../utils/catchAsync';
 
 const router = Router();
 
@@ -54,10 +55,10 @@ router.use(authenticateToken);
  *         $ref: '#/components/schemas/Error'
  */
 router.post(
-  "/",
+  '/',
   createChatValidator,
   validateRequest,
-  catchAsync(ChatController.createChat)
+  catchAsync(ChatController.createChat),
 );
 
 /**
@@ -75,7 +76,7 @@ router.post(
  *       401:
  *         $ref: '#/components/schemas/Error'
  */
-router.get("/", catchAsync(ChatController.getUserChats));
+router.get('/', catchAsync(ChatController.getUserChats));
 
 /**
  * @swagger
@@ -104,10 +105,10 @@ router.get("/", catchAsync(ChatController.getUserChats));
  *         $ref: '#/components/schemas/Error'
  */
 router.get(
-  "/:id",
+  '/:id',
   chatIdParamValidator,
   validateRequest,
-  catchAsync(ChatController.getChatById)
+  catchAsync(ChatController.getChatById),
 );
 
 export default router;

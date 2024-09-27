@@ -1,12 +1,13 @@
-import { Request, Response } from "express";
-import { UserService } from "./user.service";
-import { IUserUpdate } from "./user.types";
-import { IAuthRequest } from "../auth/auth.types";
+import type { Request, Response } from 'express';
+
+import { UserService } from './user.service';
+import type { IUserUpdate } from './user.types';
 import {
   AuthenticationError,
   BadRequestError,
   NotFoundError,
-} from "../../utils/AppError";
+} from '../../utils/AppError';
+import type { IAuthRequest } from '../auth/auth.types';
 
 export class UserController {
   /**
@@ -15,16 +16,16 @@ export class UserController {
   static async getUserById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
     if (!id) {
-      throw new BadRequestError("User ID is required");
+      throw new BadRequestError('User ID is required');
     }
     const user = await UserService.findById(id);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
 
     res.status(200).json({
       success: true,
-      message: "User profile retrieved successfully",
+      message: 'User profile retrieved successfully',
       data: { user },
     });
   }
@@ -35,19 +36,19 @@ export class UserController {
   static async updateProfile(req: IAuthRequest, res: Response): Promise<void> {
     const userId = req.user?._id;
     if (!userId) {
-      throw new AuthenticationError("User not authenticated");
+      throw new AuthenticationError('User not authenticated');
     }
 
     const updateData: IUserUpdate = req.body;
 
     const user = await UserService.updateUser(userId, updateData);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
 
     res.status(200).json({
       success: true,
-      message: "Profile updated successfully",
+      message: 'Profile updated successfully',
       data: { user },
     });
   }
@@ -58,17 +59,17 @@ export class UserController {
   static async deleteAccount(req: IAuthRequest, res: Response): Promise<void> {
     const userId = req.user?._id;
     if (!userId) {
-      throw new AuthenticationError("User not authenticated");
+      throw new AuthenticationError('User not authenticated');
     }
 
     const user = await UserService.deleteUser(userId);
     if (!user) {
-      throw new NotFoundError("User not found");
+      throw new NotFoundError('User not found');
     }
 
     res.status(200).json({
       success: true,
-      message: "Account deleted successfully",
+      message: 'Account deleted successfully',
     });
   }
 
@@ -80,7 +81,7 @@ export class UserController {
 
     res.status(200).json({
       success: true,
-      message: "Online users retrieved successfully",
+      message: 'Online users retrieved successfully',
       data: { users },
     });
   }
@@ -96,7 +97,7 @@ export class UserController {
 
     res.status(200).json({
       success: true,
-      message: "Users retrieved successfully",
+      message: 'Users retrieved successfully',
       data: result,
     });
   }
@@ -107,14 +108,14 @@ export class UserController {
   static async searchUsers(req: Request, res: Response): Promise<void> {
     const { q } = req.query;
 
-    if (!q || typeof q !== "string") {
-      throw new BadRequestError("Search query is required");
+    if (!q || typeof q !== 'string') {
+      throw new BadRequestError('Search query is required');
     }
 
     // For now, return a placeholder response
     res.status(200).json({
       success: true,
-      message: "Search functionality coming soon",
+      message: 'Search functionality coming soon',
       data: { users: [] },
     });
   }

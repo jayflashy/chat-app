@@ -1,56 +1,63 @@
-import mongoose, { Schema } from "mongoose";
-import bcrypt from "bcryptjs";
-import { IUser } from "./user.types";
+import bcrypt from 'bcryptjs';
+import mongoose, { Schema } from 'mongoose';
+
+import type { IUser } from './user.types';
 
 const userSchema = new Schema<IUser>(
   {
     username: {
       type: String,
-      required: [true, "Username is required"],
+      required: [true, 'Username is required'],
       unique: true,
       trim: true,
-      minlength: [3, "Username must be at least 3 characters"],
-      maxlength: [20, "Username cannot exceed 20 characters"],
-      match: [/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"],
+      minlength: [3, 'Username must be at least 3 characters'],
+      maxlength: [20, 'Username cannot exceed 20 characters'],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers, and underscores',
+      ],
     },
     email: {
       type: String,
-      required: [true, "Email is required"],
+      required: [true, 'Email is required'],
       unique: true,
       lowercase: true,
       trim: true,
       match: [
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-        "Please provide a valid email address",
+        'Please provide a valid email address',
       ],
     },
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minlength: [6, "Password must be at least 6 characters"],
+      required: [true, 'Password is required'],
+      minlength: [6, 'Password must be at least 6 characters'],
       select: false, // Don't include password in queries by default
     },
     name: {
       type: String,
-      required: [true, "Name is required"],
+      required: [true, 'Name is required'],
       trim: true,
-      minlength: [2, "Name must be at least 2 characters"],
-      maxlength: [50, "Name cannot exceed 50 characters"],
+      minlength: [2, 'Name must be at least 2 characters'],
+      maxlength: [50, 'Name cannot exceed 50 characters'],
     },
     avatar: {
       type: String,
       default: null,
       validate: {
-        validator: function(v: string) {
+        validator: function (v: string) {
           if (!v) return true; // Allow null/empty
-          return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v) || /^uploads\/.+$/.test(v);
+          return (
+            /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v) ||
+            /^uploads\/.+$/.test(v)
+          );
         },
-        message: "Avatar must be a valid URL or file path",
+        message: 'Avatar must be a valid URL or file path',
       },
     },
     bio: {
       type: String,
-      maxlength: [500, "Bio cannot exceed 500 characters"],
+      maxlength: [500, 'Bio cannot exceed 500 characters'],
       trim: true,
     },
     isOnline: {
@@ -66,7 +73,7 @@ const userSchema = new Schema<IUser>(
       default: true,
     },
   },
-  { 
+  {
     timestamps: true,
     toJSON: {
       transform: function (doc, ret) {
@@ -76,7 +83,7 @@ const userSchema = new Schema<IUser>(
         return ret;
       },
     },
-  }
+  },
 );
 
 // Indexes for better query performance
@@ -87,9 +94,9 @@ userSchema.index({ email: 1, isActive: 1 });
 userSchema.index({ isOnline: 1, lastSeen: 1 });
 
 // Hash password before saving
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -100,7 +107,9 @@ userSchema.pre("save", async function (next) {
 });
 
 // Compare password method
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+userSchema.methods.comparePassword = async function (
+  candidatePassword: string,
+): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -119,6 +128,6 @@ userSchema.methods.setOnlineStatus = function (isOnline: boolean) {
   return this.save();
 };
 
-const User = mongoose.model<IUser>("User", userSchema);
+const User = mongoose.model<IUser>('User', userSchema);
 
 export default User;

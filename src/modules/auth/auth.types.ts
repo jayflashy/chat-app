@@ -1,5 +1,6 @@
-import { IUser } from "../user/user.types";
-import { Request } from "express";
+import type { Request } from 'express';
+
+import type { IUser } from '../user/user.types';
 export interface IAuthResponse {
   success: boolean;
   message: string;

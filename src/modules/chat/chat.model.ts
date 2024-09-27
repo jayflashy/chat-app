@@ -1,58 +1,65 @@
 import { Schema, model } from 'mongoose';
-import { IChat, IChatParticipant } from './chat.interface';
 
-const participantSchema = new Schema<IChatParticipant>({
-  user: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'User',
-    required: true 
-  },
-  joinedAt: { 
-    type: Date, 
-    default: Date.now 
-  },
-  role: { 
-    type: String, 
-    enum: ['admin', 'member'], 
-    default: 'member' 
-  }
-}, { _id: false });
+import type { IChat, IChatParticipant } from './chat.interface';
 
-const chatSchema = new Schema<IChat>({
-  type: { 
-    type: String, 
-    enum: ['direct', 'group'], 
-    required: true 
+const participantSchema = new Schema<IChatParticipant>(
+  {
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now,
+    },
+    role: {
+      type: String,
+      enum: ['admin', 'member'],
+      default: 'member',
+    },
   },
-  participants: [participantSchema],
-  name: { 
-    type: String,
-    required: function() { 
-      return this.type === 'group'; 
-    }
+  { _id: false },
+);
+
+const chatSchema = new Schema<IChat>(
+  {
+    type: {
+      type: String,
+      enum: ['direct', 'group'],
+      required: true,
+    },
+    participants: [participantSchema],
+    name: {
+      type: String,
+      required: function () {
+        return this.type === 'group';
+      },
+    },
+    description: String,
+    avatar: String,
+    createdBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    lastMessage: {
+      type: Schema.Types.ObjectId,
+      ref: 'Message',
+    },
+    // Normalized key for direct chats to ensure uniqueness regardless of order
+    membersKey: { type: String, index: true },
   },
-  description: String,
-  avatar: String,
-  createdBy: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'User',
-    required: true 
+  {
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
-  isActive: { 
-    type: Boolean, 
-    default: true 
-  },
-  lastMessage: { 
-    type: Schema.Types.ObjectId, 
-    ref: 'Message' 
-  },
-  // Normalized key for direct chats to ensure uniqueness regardless of order
-  membersKey: { type: String, index: true }
-}, { 
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
-});
+);
 
 // Index for faster querying
 chatSchema.index({ 'participants.user': 1 });
@@ -62,7 +69,7 @@ chatSchema.index({ type: 1, 'participants.user': 1 });
 chatSchema.virtual('messages', {
   ref: 'Message',
   localField: '_id',
-  foreignField: 'chat'
+  foreignField: 'chat',
 });
 
 // Compute membersKey for direct chats before validation
@@ -90,8 +97,8 @@ chatSchema.index(
   {
     unique: true,
     partialFilterExpression: { type: 'direct', membersKey: { $exists: true } },
-    name: 'unique_direct_membersKey'
-  }
+    name: 'unique_direct_membersKey',
+  },
 );
 
 const Chat = model<IChat>('Chat', chatSchema);

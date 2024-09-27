@@ -19,7 +19,7 @@ export const createChatValidator = [
   body('description')
     .optional()
     .isString()
-    .withMessage('description must be a string')
+    .withMessage('description must be a string'),
 ];
 
 export const chatIdParamValidator = [
@@ -27,7 +27,5 @@ export const chatIdParamValidator = [
     .isString()
     .withMessage('id must be a string')
     .isLength({ min: 1 })
-    .withMessage('id is required')
+    .withMessage('id is required'),
 ];
-
-

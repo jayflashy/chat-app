@@ -1,12 +1,13 @@
-import { Router } from "express";
-import { UserController } from "./user.controller";
+import { Router } from 'express';
+
+import { UserController } from './user.controller';
+import { updateProfileValidator } from './user.validation';
 import {
   authenticateToken,
   optionalAuth,
-} from "../../middleware/auth.middleware";
-import { validateRequest } from "../../middleware/validation.middleware";
-import { catchAsync } from "../../utils/catchAsync";
-import { updateProfileValidator } from "./user.validation";
+} from '../../middleware/auth.middleware';
+import { validateRequest } from '../../middleware/validation.middleware';
+import { catchAsync } from '../../utils/catchAsync';
 
 const router: Router = Router();
 
@@ -61,11 +62,11 @@ const router: Router = Router();
  *         $ref: '#/components/schemas/Error'
  */
 router.put(
-  "/profile",
+  '/profile',
   authenticateToken,
   updateProfileValidator,
   validateRequest,
-  catchAsync(UserController.updateProfile)
+  catchAsync(UserController.updateProfile),
 );
 
 /**
@@ -95,9 +96,9 @@ router.put(
  *         $ref: '#/components/schemas/Error'
  */
 router.delete(
-  "/profile",
+  '/profile',
   authenticateToken,
-  catchAsync(UserController.deleteAccount)
+  catchAsync(UserController.deleteAccount),
 );
 
 /**
@@ -129,7 +130,7 @@ router.delete(
  *                       items:
  *                         $ref: '#/components/schemas/User'
  */
-router.get("/online", catchAsync(UserController.getOnlineUsers));
+router.get('/online', catchAsync(UserController.getOnlineUsers));
 
 /**
  * @swagger
@@ -185,7 +186,7 @@ router.get("/online", catchAsync(UserController.getOnlineUsers));
  *                       type: integer
  *                       example: 1
  */
-router.get("/", catchAsync(UserController.getAllUsers));
+router.get('/', catchAsync(UserController.getAllUsers));
 
 /**
  * @swagger
@@ -223,7 +224,7 @@ router.get("/", catchAsync(UserController.getAllUsers));
  *                       items:
  *                         $ref: '#/components/schemas/User'
  */
-router.get("/search", catchAsync(UserController.searchUsers));
+router.get('/search', catchAsync(UserController.searchUsers));
 
 /**
  * @swagger
@@ -261,6 +262,6 @@ router.get("/search", catchAsync(UserController.searchUsers));
  *       404:
  *         $ref: '#/components/schemas/Error'
  */
-router.get("/:id", catchAsync(UserController.getUserById));
+router.get('/:id', catchAsync(UserController.getUserById));
 
 export default router;

@@ -1,7 +1,7 @@
-import Chat from "./chat.model";
-import { CreateChatDto, IChat } from "./chat.interface";
-import { UserService } from "../user/user.service";
-import { ValidationError } from "../../utils/AppError";
+import type { CreateChatDto, IChat } from './chat.interface';
+import Chat from './chat.model';
+import { ValidationError } from '../../utils/AppError';
+import { UserService } from '../user/user.service';
 
 export class ChatService {
   /**
@@ -11,15 +11,15 @@ export class ChatService {
     const { type, participants, name, description, createdBy } = createChatDto;
 
     // For direct messages, check if a chat already exists between these users
-    if (type === "direct") {
+    if (type === 'direct') {
       const members = Array.from(new Set([createdBy, ...(participants || [])]))
         .map(String)
         .sort();
       if (members.length !== 2) {
         throw new ValidationError([
           {
-            field: "participants",
-            message: "Direct chat must have exactly two distinct participants",
+            field: 'participants',
+            message: 'Direct chat must have exactly two distinct participants',
           },
         ]);
       }
@@ -37,21 +37,21 @@ export class ChatService {
       }> = [];
       if (!userA)
         missing.push({
-          field: "participants",
-          message: "User not found",
+          field: 'participants',
+          message: 'User not found',
           value: idA,
         });
       if (!userB)
         missing.push({
-          field: "participants",
-          message: "User not found",
+          field: 'participants',
+          message: 'User not found',
           value: idB,
         });
       if (missing.length) {
         throw new ValidationError(missing);
       }
-      const membersKey = members.join(":");
-      const existingChat = await Chat.findOne({ type: "direct", membersKey });
+      const membersKey = members.join(':');
+      const existingChat = await Chat.findOne({ type: 'direct', membersKey });
       if (existingChat) {
         return existingChat as IChat;
       }
@@ -59,8 +59,8 @@ export class ChatService {
       const chat = new Chat({
         type,
         participants: [
-          { user: idA, role: "member" },
-          { user: idB, role: "member" },
+          { user: idA, role: 'member' },
+          { user: idB, role: 'member' },
         ],
         name,
         description,
@@ -74,13 +74,13 @@ export class ChatService {
 
     // Prepare participants array with the creator as admin
     const others = (participants || []).filter(
-      (userId) => userId.toString() !== createdBy.toString()
+      (userId) => userId.toString() !== createdBy.toString(),
     );
 
     // Validate that all other participants exist
     if (others.length) {
       const results = await Promise.all(
-        others.map((id) => UserService.findById(String(id)))
+        others.map((id) => UserService.findById(String(id))),
       );
       const missing: Array<{
         field: string;
@@ -90,8 +90,8 @@ export class ChatService {
       results.forEach((u, idx) => {
         if (!u)
           missing.push({
-            field: "participants",
-            message: "User not found",
+            field: 'participants',
+            message: 'User not found',
             value: String(others[idx]),
           });
       });
@@ -101,8 +101,8 @@ export class ChatService {
     }
 
     const chatParticipants = [
-      { user: createdBy, role: "admin" as const },
-      ...others.map((userId) => ({ user: userId, role: "member" as const })),
+      { user: createdBy, role: 'admin' as const },
+      ...others.map((userId) => ({ user: userId, role: 'member' as const })),
     ];
 
     const chat = new Chat({
@@ -123,10 +123,10 @@ export class ChatService {
    */
   static async findDirectChat(
     userId1: string,
-    userId2: string
+    userId2: string,
   ): Promise<IChat | null> {
-    const membersKey = [userId1, userId2].map(String).sort().join(":");
-    const chat = await Chat.findOne({ type: "direct", membersKey });
+    const membersKey = [userId1, userId2].map(String).sort().join(':');
+    const chat = await Chat.findOne({ type: 'direct', membersKey });
     return chat as IChat | null;
   }
 
@@ -135,12 +135,12 @@ export class ChatService {
    */
   static async getUserChats(userId: string): Promise<IChat[]> {
     const chats = await Chat.find({
-      "participants.user": userId,
+      'participants.user': userId,
       isActive: true,
     })
       .sort({ updatedAt: -1 })
-      .populate("participants.user", "username email avatar")
-      .populate("lastMessage");
+      .populate('participants.user', 'username email avatar')
+      .populate('lastMessage');
     return chats as unknown as IChat[];
   }
 
@@ -149,15 +149,15 @@ export class ChatService {
    */
   static async getChatById(
     chatId: string,
-    userId: string
+    userId: string,
   ): Promise<IChat | null> {
     const chat = await Chat.findOne({
       _id: chatId,
-      "participants.user": userId,
+      'participants.user': userId,
       isActive: true,
     })
-      .populate("participants.user", "username email avatar")
-      .populate("lastMessage");
+      .populate('participants.user', 'username email avatar')
+      .populate('lastMessage');
     return chat as IChat | null;
   }
 
@@ -166,12 +166,12 @@ export class ChatService {
    */
   static async updateLastMessage(
     chatId: string,
-    messageId: string
+    messageId: string,
   ): Promise<IChat | null> {
     const chat = await Chat.findByIdAndUpdate(
       chatId,
       { lastMessage: messageId },
-      { new: true }
+      { new: true },
     );
     return chat as IChat | null;
   }
@@ -182,7 +182,7 @@ export class ChatService {
   static async isUserInChat(chatId: string, userId: string): Promise<boolean> {
     const count = await Chat.countDocuments({
       _id: chatId,
-      "participants.user": userId,
+      'participants.user': userId,
       isActive: true,
     });
     return count > 0;

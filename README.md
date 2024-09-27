@@ -49,12 +49,14 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 ## 📦 Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd chat-app
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    # or
@@ -62,23 +64,25 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp .env.example .env
    ```
-   
+
    Update the `.env` file with your configuration:
+
    ```env
    PORT=5000
    NODE_ENV=development
    CLIENT_URL=http://localhost:3000
-   
+
    # Database
    MONGODB_URI=mongodb://localhost:27017/chat-app
-   
+
    # JWT
    JWT_SECRET=your-super-secret-jwt-key-here
    JWT_EXPIRE=7d
-   
+
    # Logging
    LOG_LEVEL=info
    ```
@@ -92,6 +96,7 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 ## 🚀 Development
 
 1. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -112,15 +117,18 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 ## 🔧 API Endpoints
 
 ### Health Check
+
 - `GET /api/health` - Server health status
 
 ### User Routes (Coming Soon)
+
 - `POST /api/auth/register` - User registration
 - `POST /api/auth/login` - User login
 - `GET /api/users/profile` - Get user profile
 - `PUT /api/users/profile` - Update user profile
 
 ### Chat Routes (Coming Soon)
+
 - `GET /api/chat/rooms` - Get chat rooms
 - `POST /api/chat/rooms` - Create chat room
 - `GET /api/chat/rooms/:id/messages` - Get room messages
@@ -128,6 +136,7 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 ## 🔌 Socket.IO Events
 
 ### Client to Server
+
 - `join_room` - Join a chat room
 - `leave_room` - Leave a chat room
 - `send_message` - Send a message
@@ -135,6 +144,7 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 - `typing_stop` - User stopped typing
 
 ### Server to Client
+
 - `message_received` - New message received
 - `user_joined` - User joined room
 - `user_left` - User left room
@@ -164,6 +174,7 @@ Log levels: `debug`, `info`, `warn`, `error`
 ## 🗄️ Database Schema
 
 ### User Model
+
 ```typescript
 {
   username: string (unique, required)
@@ -180,11 +191,13 @@ Log levels: `debug`, `info`, `warn`, `error`
 ## 🚀 Deployment
 
 1. **Build the application**
+
    ```bash
    npm run build
    ```
 
 2. **Set production environment variables**
+
    ```env
    NODE_ENV=production
    MONGODB_URI=your-production-mongodb-uri

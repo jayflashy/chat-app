@@ -1,46 +1,46 @@
-import { body } from "express-validator";
+import { body } from 'express-validator';
 
 export const registerValidator = [
-  body("username")
+  body('username')
     .isLength({ min: 3, max: 20 })
-    .withMessage("Username must be between 3 and 20 characters")
+    .withMessage('Username must be between 3 and 20 characters')
     .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("Username can only contain letters, numbers, and underscores"),
+    .withMessage('Username can only contain letters, numbers, and underscores'),
 
-  body("email")
+  body('email')
     .isEmail()
-    .withMessage("Please provide a valid email address")
+    .withMessage('Please provide a valid email address')
     .normalizeEmail(),
 
-  body("password")
+  body('password')
     .isLength({ min: 6 })
-    .withMessage("Password must be at least 6 characters long"),
+    .withMessage('Password must be at least 6 characters long'),
 
-  body("confirmPassword").custom((value, { req }) => {
+  body('confirmPassword').custom((value, { req }) => {
     if (value !== req.body.password) {
-      throw new Error("Passwords do not match");
+      throw new Error('Passwords do not match');
     }
     return true;
   }),
 
-  body("name")
+  body('name')
     .isLength({ min: 2, max: 50 })
-    .withMessage("Name must be between 2 and 50 characters")
+    .withMessage('Name must be between 2 and 50 characters')
     .trim(),
 
-  body("avatar").optional().isURL().withMessage("Avatar must be a valid URL"),
+  body('avatar').optional().isURL().withMessage('Avatar must be a valid URL'),
 
-  body("bio")
+  body('bio')
     .optional()
     .isLength({ max: 500 })
-    .withMessage("Bio cannot exceed 500 characters"),
+    .withMessage('Bio cannot exceed 500 characters'),
 ];
 
 export const loginValidator = [
-  body("email")
+  body('email')
     .isEmail()
-    .withMessage("Please provide a valid email address")
+    .withMessage('Please provide a valid email address')
     .normalizeEmail(),
 
-  body("password").notEmpty().withMessage("Password is required"),
+  body('password').notEmpty().withMessage('Password is required'),
 ];
