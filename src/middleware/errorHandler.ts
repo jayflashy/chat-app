@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import logger from "../utils/logger";
-import { AppError, NotFoundError } from "../utils/AppError";
+import { AppError, NotFoundError, ValidationError } from "../utils/AppError";
 
 export const notFound = (req: Request, res: Response, next: NextFunction) => {
   const error = new NotFoundError(`Not found - ${req.originalUrl}`);
@@ -13,9 +13,9 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  let error = { ...err, message: err.message };
+  const error = err;
   let statusCode = 500;
-
+  
   if (error instanceof AppError) {
     statusCode = error.statusCode;
   }
@@ -36,6 +36,8 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     error: clientMessage,
+    statusCode: statusCode,
+    ...(error instanceof ValidationError ? { details: error.details } : {}),
     timestamp: new Date().toISOString(),
   });
 };

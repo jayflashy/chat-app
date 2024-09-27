@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { validationResult } from "express-validator";
 import logger from "../utils/logger";
+import { ValidationError } from "../utils/AppError";
 
 /**
  * Middleware to validate request data
@@ -17,12 +18,8 @@ export const validateRequest = (req: Request, res: Response, next: NextFunction)
 
     logger.warn(`Validation errors: ${JSON.stringify(errorMessages)}`);
 
-    res.status(400).json({
-      success: false,
-      error: "Validation failed",
-      details: errorMessages,
-      timestamp: new Date().toISOString()
-    });
+    // Forward to centralized error handler
+    next(new ValidationError(errorMessages));
     return;
   }
   

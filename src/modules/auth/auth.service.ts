@@ -1,8 +1,14 @@
 import jwt from "jsonwebtoken";
 import { UserService } from "../user/user.service";
-import { ILoginRequest, IRegisterRequest, IAuthResponse, IAuthPayload } from "./auth.types";
+import {
+  ILoginRequest,
+  IRegisterRequest,
+  IAuthResponse,
+  IAuthPayload,
+} from "./auth.types";
 import { IUserInput } from "../user/user.types";
 import logger from "../../utils/logger";
+import { BadRequestError, ValidationError } from "../../utils/AppError";
 
 export class AuthService {
   /**
@@ -20,13 +26,15 @@ export class AuthService {
       // Check if email already exists
       const emailExists = await UserService.emailExists(userData.email);
       if (emailExists) {
-        throw new Error("Email already exists");
+        throw new BadRequestError("Email already exists");
       }
 
       // Check if username already exists
-      const usernameExists = await UserService.usernameExists(userData.username);
+      const usernameExists = await UserService.usernameExists(
+        userData.username
+      );
       if (usernameExists) {
-        throw new Error("Username already exists");
+        throw new BadRequestError("Username already exists");
       }
 
       // Create user
@@ -36,7 +44,7 @@ export class AuthService {
       const token = this.generateToken({
         userId: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
       });
 
       logger.info(`User registered successfully: ${user.email}`);
@@ -46,8 +54,8 @@ export class AuthService {
         message: "User registered successfully",
         data: {
           user,
-          token
-        }
+          token,
+        },
       };
     } catch (error) {
       logger.error(`Registration error: ${error}`);
@@ -86,7 +94,7 @@ export class AuthService {
       const token = this.generateToken({
         userId: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
       });
 
       logger.info(`User logged in successfully: ${user.email}`);
@@ -96,8 +104,8 @@ export class AuthService {
         message: "Login successful",
         data: {
           user,
-          token
-        }
+          token,
+        },
       };
     } catch (error) {
       logger.error(`Login error: ${error}`);
@@ -108,7 +116,9 @@ export class AuthService {
   /**
    * Logout user
    */
-  static async logout(userId: string): Promise<{ success: boolean; message: string }> {
+  static async logout(
+    userId: string
+  ): Promise<{ success: boolean; message: string }> {
     try {
       // Update online status to false
       await UserService.updateOnlineStatus(userId, false);
@@ -117,7 +127,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: "Logout successful"
+        message: "Logout successful",
       };
     } catch (error) {
       logger.error(`Logout error: ${error}`);
@@ -138,7 +148,7 @@ export class AuthService {
       return {
         success: true,
         message: "User profile retrieved successfully",
-        data: { user }
+        data: { user },
       };
     } catch (error) {
       logger.error(`Get current user error: ${error}`);
@@ -179,7 +189,9 @@ export class AuthService {
   /**
    * Refresh token (generate new token with same payload)
    */
-  static async refreshToken(userId: string): Promise<{ success: boolean; data: { token: string } }> {
+  static async refreshToken(
+    userId: string
+  ): Promise<{ success: boolean; data: { token: string } }> {
     try {
       const user = await UserService.findById(userId);
       if (!user) {
@@ -189,12 +201,12 @@ export class AuthService {
       const token = this.generateToken({
         userId: user._id,
         email: user.email,
-        username: user.username
+        username: user.username,
       });
 
       return {
         success: true,
-        data: { token }
+        data: { token },
       };
     } catch (error) {
       logger.error(`Refresh token error: ${error}`);

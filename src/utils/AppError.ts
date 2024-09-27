@@ -34,3 +34,22 @@ export class NotFoundError extends AppError {
     super(message, 404);
   }
 }
+
+// Validation Error that carries structured details
+export class ValidationError extends AppError {
+  public readonly details: Array<{ field: string; message: string; value?: unknown }>;
+  constructor(
+    details: Array<{ field: string; message: string; value?: unknown }>,
+    message: string = "Validation failed"
+  ) {
+    super(message, 422, true);
+    this.details = details;
+  }
+}
+
+// Generic HTTP error convenience when you want to specify any status code
+export class HttpError extends AppError {
+  constructor(message: string, statusCode: number, isOperational: boolean = true) {
+    super(message, statusCode, isOperational);
+  }
+}

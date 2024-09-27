@@ -19,7 +19,7 @@ import { swaggerUi, swaggerSpec } from "./config/swagger";
 // Import routes
 import authRoutes from './modules/auth/auth.routes';
 import userRoutes from './modules/user/user.routes';
-// import chatRoutes from './routes/chat';
+import chatRoutes from './modules/chat/chat.routes';
 
 // Import socket handlers (this will be created later)
 // import socketHandler from './sockets/socketHandler';
@@ -66,7 +66,7 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
-// app.use('/api/v1/chat', chatRoutes);
+app.use('/api/v1/chats', chatRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({
