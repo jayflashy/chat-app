@@ -2,10 +2,7 @@ import { Router } from 'express';
 
 import { UserController } from './user.controller';
 import { updateProfileValidator } from './user.validation';
-import {
-  authenticateToken,
-  optionalAuth,
-} from '../../middleware/auth.middleware';
+import { authenticateToken } from '../../middleware/auth.middleware';
 import { validateRequest } from '../../middleware/validation.middleware';
 import { catchAsync } from '../../utils/catchAsync';
 

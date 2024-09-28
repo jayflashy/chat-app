@@ -41,4 +41,5 @@ export const errorHandler = (
     ...(error instanceof ValidationError ? { details: error.details } : {}),
     timestamp: new Date().toISOString(),
   });
+  next();
 };

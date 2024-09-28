@@ -1,7 +1,7 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import type { Application } from 'express';
-import express, { Request, Response } from 'express';
+import express from 'express';
 import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import http from 'http';
@@ -17,13 +17,10 @@ import { errorHandler, notFound } from './middleware/errorHandler';
 import { requestLogger } from './middleware/requestLogger';
 import authRoutes from './modules/auth/auth.routes';
 import chatRoutes from './modules/chat/chat.routes';
+import messageRoutes from './modules/message/message.routes';
 import userRoutes from './modules/user/user.routes';
+import socketHandler from './sockets/socketHandler';
 import logger from './utils/logger';
-
-// Import routes
-
-// Import socket handlers (this will be created later)
-// import socketHandler from './sockets/socketHandler';
 
 const app: Application = express();
 const server = http.createServer(app);
@@ -68,6 +65,7 @@ app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/chats', chatRoutes);
+app.use('/api/v1/messages', messageRoutes);
 
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -77,8 +75,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// Socket.IO connection handling (commented out until socket handler is created)
-// socketHandler(io);
+// Socket.IO connection handling
+socketHandler(io);
 
 // Error handling middleware
 app.use(notFound);

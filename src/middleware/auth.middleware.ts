@@ -1,5 +1,4 @@
 import type { Response, NextFunction } from 'express';
-import { Request } from 'express';
 
 import { AuthService } from '../modules/auth/auth.service';
 import { UserService } from '../modules/user/user.service';
@@ -89,6 +88,7 @@ export const optionalAuth = async (
     next();
   } catch (error) {
     // Continue without authentication
+    logger.error(`Authentication error: ${error}`);
     next();
   }
 };

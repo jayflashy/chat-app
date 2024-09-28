@@ -6,7 +6,7 @@ import type {
   IAuthResponse,
   IAuthPayload,
 } from './auth.types';
-import { BadRequestError, ValidationError } from '../../utils/AppError';
+import { BadRequestError } from '../../utils/AppError';
 import logger from '../../utils/logger';
 import { UserService } from '../user/user.service';
 import type { IUserInput } from '../user/user.types';
@@ -183,7 +183,7 @@ export class AuthService {
     try {
       return jwt.verify(token, secret) as IAuthPayload;
     } catch (error) {
-      throw new Error('Invalid or expired token');
+      throw new Error(`Invalid or expired token: ${error}`);
     }
   }
 
