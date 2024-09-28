@@ -61,8 +61,12 @@ export class MessageService {
 
     // Update chat's lastMessage reference
     await Chat.findByIdAndUpdate(chatId, { lastMessage: message._id });
+    const populatedMessage = await message.populate(
+      'sender',
+      'username name email avatar',
+    );
 
-    return message;
+    return populatedMessage;
   }
 
   static async listMessages(

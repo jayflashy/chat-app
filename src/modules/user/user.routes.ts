@@ -8,6 +8,7 @@ import { catchAsync } from '../../utils/catchAsync';
 
 const router: Router = Router();
 
+router.use(authenticateToken);
 /**
  * @swagger
  * /users/profile:
@@ -60,7 +61,6 @@ const router: Router = Router();
  */
 router.put(
   '/profile',
-  authenticateToken,
   updateProfileValidator,
   validateRequest,
   catchAsync(UserController.updateProfile),
@@ -94,7 +94,7 @@ router.put(
  */
 router.delete(
   '/profile',
-  authenticateToken,
+
   catchAsync(UserController.deleteAccount),
 );
 

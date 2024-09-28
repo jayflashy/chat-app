@@ -244,4 +244,30 @@ export class UserService {
       throw error;
     }
   }
+  
+  /**
+   * Search for users by username or name, excluding the current user
+   */
+  static async searchUsers(
+    query: string,
+    excludeUserId: string,
+  ): Promise<IUser[]> {
+    try {
+      const searchRegex = new RegExp(query, 'i'); // 'i' for case-insensitive
+      const users = await User.find({
+        _id: { $ne: excludeUserId }, // Exclude the user performing the search
+        isActive: true,
+        $or: [
+          { username: { $regex: searchRegex } },
+          { name: { $regex: searchRegex } },
+        ],
+      })
+        .select('name username avatar')
+        .limit(10); // Limit results for performance
+      return users;
+    } catch (error) {
+      logger.error(`Error searching users: ${error}`);
+      throw error;
+    }
+  }
 }

@@ -105,18 +105,23 @@ export class UserController {
   /**
    * Search users by username or name
    */
-  static async searchUsers(req: Request, res: Response): Promise<void> {
+  static async searchUsers(req: IAuthRequest, res: Response): Promise<void> {
     const { q } = req.query;
+    const userId = req.user?._id;
 
-    if (!q || typeof q !== 'string') {
+    if (!userId) {
+      throw new AuthenticationError('User not authenticated');
+    }
+    if (!q || typeof q !== 'string' || q.trim() === '') {
       throw new BadRequestError('Search query is required');
     }
 
-    // For now, return a placeholder response
+    const users = await UserService.searchUsers(q as string, userId);
+
     res.status(200).json({
       success: true,
-      message: 'Search functionality coming soon',
-      data: { users: [] },
+      message: 'Search results retrieved successfully',
+      data: { users },
     });
   }
 }
