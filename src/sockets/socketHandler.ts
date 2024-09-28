@@ -6,6 +6,8 @@ import { ChatService } from '../modules/chat/chat.service';
 import { MessageService } from '../modules/message/message.service';
 import type { SendMessageDto } from '../modules/message/message.service';
 import { UserService } from '../modules/user/user.service';
+import { AuthenticationError, ValidationError } from '../utils/AppError';
+import { validateSendMessagePayload } from '../utils/socketValidator';
 import logger from '../utils/logger';
 
 type AuthedSocket = Socket & { userId?: string };
@@ -26,14 +28,15 @@ export default function socketHandler(io: Server) {
   io.use(async (socket: AuthedSocket, next) => {
     try {
       const token = getTokenFromHandshake(socket);
-      if (!token) return next(new Error('Unauthorized'));
+      if (!token) return next(new AuthenticationError('Unauthorized'));
       const payload = AuthService.verifyToken(token);
       const user = await UserService.findById(payload.userId);
-      if (!user || !user.isActive) return next(new Error('Unauthorized'));
+      if (!user || !user.isActive)
+        return next(new AuthenticationError('Unauthorized'));
       socket.userId = String(user._id);
       next();
     } catch (err) {
-      next(new Error(`Unauthorized ${err}`));
+      next(new AuthenticationError(`Unauthorized ${err}`));
     }
   });
 
@@ -45,16 +48,34 @@ export default function socketHandler(io: Server) {
 
     socket.on(
       'chat:join',
-      async (chatId: string, ack?: (ok: boolean, err?: string) => void) => {
+      async (
+        chatId: string,
+        ack?: (result: {
+          success: boolean;
+          error?: string;
+          details?: any[];
+        }) => void,
+      ) => {
         try {
           if (!Types.ObjectId.isValid(chatId))
-            throw new Error('Invalid chat id');
+            throw new ValidationError([
+              { field: 'chatId', message: 'Invalid chat id' },
+            ]);
           const isMember = await ChatService.isUserInChat(chatId, userId);
-          if (!isMember) throw new Error('Not a member of this chat');
+          if (!isMember)
+            throw new AuthenticationError('Not a member of this chat');
           socket.join(`chat:${chatId}`);
-          ack?.(true);
+          ack?.({ success: true });
         } catch (e: any) {
-          ack?.(false, e?.message || 'Failed to join chat');
+          logger.error('Failed to join chat:', e);
+          if (e instanceof ValidationError) {
+            ack?.({ success: false, error: e.message, details: e.details });
+          } else {
+            ack?.({
+              success: false,
+              error: e?.message || 'Failed to join chat',
+            });
+          }
         }
       },
     );
@@ -66,37 +87,42 @@ export default function socketHandler(io: Server) {
     socket.on(
       'message:send',
       async (
-        payload: {
-          chatId: string;
-          content?: string;
-          attachment?: {
-            type: 'image' | 'video' | 'file' | 'audio';
-            url?: string;
-            name?: string;
-            size?: number;
-          };
-        },
-        ack?: (result: { success: boolean; error?: string }) => void,
+        payload: any,
+        ack?: (result: {
+          success: boolean;
+          error?: string;
+          details?: Array<{ field: string; message: string }>;
+        }) => void,
       ) => {
         try {
+          // Validate payload
+          validateSendMessagePayload(payload);
+
+          const { chatId, content, attachment } = payload;
           const dto: SendMessageDto = {
-            chatId: payload.chatId,
+            chatId,
             senderId: userId,
-            ...(payload.content !== undefined
-              ? { content: payload.content }
-              : {}),
-            ...(payload.attachment !== undefined
-              ? { attachment: payload.attachment }
-              : {}),
+            ...(content && { content }),
+            ...(attachment && { attachment }),
           };
+
           const message = await MessageService.sendMessage(dto);
           io.to(`chat:${payload.chatId}`).emit('message:new', message);
           ack?.({ success: true });
         } catch (e: any) {
-          ack?.({
-            success: false,
-            error: e?.message || 'Failed to send message',
-          });
+          if (e instanceof ValidationError) {
+            ack?.({
+              success: false,
+              error: 'Validation failed',
+              details: e.details,
+            });
+          } else {
+            logger.error('Failed to send message:', e);
+            ack?.({
+              success: false,
+              error: e?.message || 'Failed to send message',
+            });
+          }
         }
       },
     );
@@ -109,9 +135,20 @@ export default function socketHandler(io: Server) {
           success: boolean;
           modified?: number;
           error?: string;
+          details?: any[];
         }) => void,
       ) => {
         try {
+          if (!Types.ObjectId.isValid(payload.chatId)) {
+            throw new ValidationError([
+              { field: 'chatId', message: 'Invalid chat ID' },
+            ]);
+          }
+          if (payload.upTo && !Types.ObjectId.isValid(payload.upTo)) {
+            throw new ValidationError([
+              { field: 'upTo', message: 'Invalid message ID for upTo' },
+            ]);
+          }
           const result = await MessageService.markAsRead(
             payload.chatId,
             userId,
@@ -125,10 +162,15 @@ export default function socketHandler(io: Server) {
           });
           ack?.({ success: true, modified: result.modified });
         } catch (e: any) {
-          ack?.({
-            success: false,
-            error: e?.message || 'Failed to mark as read',
-          });
+          logger.error('Failed to mark as read:', e);
+          if (e instanceof ValidationError) {
+            ack?.({ success: false, error: e.message, details: e.details });
+          } else {
+            ack?.({
+              success: false,
+              error: e?.message || 'Failed to mark as read',
+            });
+          }
         }
       },
     );

@@ -25,19 +25,17 @@ export class AuthService {
       }
 
       // Check if email already exists
-      const emailExists = await UserService.emailExists(userData.email);
-      if (emailExists) {
-        throw new BadRequestError('Email already exists');
-      }
-
+      const emailExists = await UserService.emailExists(userData.email);     
       // Check if username already exists
       const usernameExists = await UserService.usernameExists(
         userData.username,
       );
-      if (usernameExists) {
-        throw new BadRequestError('Username already exists');
-      }
 
+      if (emailExists || usernameExists) {
+        throw new BadRequestError(
+          'A user with that email or username already exists.',
+        );
+      }
       // Create user
       const user = await UserService.createUser(userInput as IUserInput);
 
