@@ -1,8 +1,9 @@
+
 # Chat App Backend
 
 A real-time chat application backend built with Node.js, Express, TypeScript, MongoDB, and Socket.IO.
 
-## 🚀 Features
+## � Features
 
 - **Real-time messaging** with Socket.IO
 - **User authentication** with JWT
@@ -13,13 +14,14 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 - **Rate limiting** and security middleware
 - **Modular architecture** for scalability
 
-## 📁 Project Structure
+## �📁 Project Structure
 
 ```
 ├── src/
 │   ├── config/           # Database and app configuration
 │   ├── middleware/       # Custom middleware (auth, error handling)
 │   ├── modules/          # Feature modules (user, chat, message)
+│   │   ├── auth/         # Auth module
 │   │   ├── user/         # User module
 │   │   ├── chat/         # Chat module
 │   │   └── message/      # Message module
@@ -34,197 +36,141 @@ A real-time chat application backend built with Node.js, Express, TypeScript, Mo
 
 ## 🛠️ Tech Stack
 
-- **Runtime**: Node.js
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: MongoDB with Mongoose
-- **Real-time**: Socket.IO
-- **Authentication**: JWT (jsonwebtoken)
-- **Password Hashing**: bcrypt
-- **File Uploads**: Multer
-- **Logging**: Pino
-- **Security**: Helmet, CORS, Rate Limiting
-- **Validation**: express-validator
+- Runtime: Node.js
+- Framework: Express.js
+- Language: TypeScript
+- Database: MongoDB with Mongoose
+- Real-time: Socket.IO
+- Authentication: JWT (jsonwebtoken)
+- Password Hashing: bcryptjs
+- File Uploads: Multer
+- Logging: Pino
+- Security: Helmet, CORS, Rate Limiting
+- Validation: express-validator
 
-## 📦 Installation
+## 📦 Quick Start
 
-1. **Clone the repository**
+1. Clone the repository and install dependencies:
 
-   ```bash
-   git clone <repository-url>
-   cd chat-app
-   ```
+```powershell
+git clone <repository-url>
+cd chat-app
+pnpm install
+# or with pnpm
+pnpm install
+```
 
-2. **Install dependencies**
+2. Copy the example environment file and edit it:
 
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
+```powershell
+copy .env.example .env
+# then open .env in your editor and configure values (PORT, MONGODB_URI, JWT_SECRET, etc.)
+```
 
-3. **Set up environment variables**
+3. Make sure MongoDB is running locally (or point `MONGODB_URI` to a running instance).
 
-   ```bash
-   cp .env.example .env
-   ```
+```powershell
+# Start a local MongoDB server if you have it installed
+mongod
+```
 
-   Update the `.env` file with your configuration:
+4. Start the development server (hot-reloads on change):
 
-   ```env
-   PORT=5000
-   NODE_ENV=development
-   CLIENT_URL=http://localhost:3000
+```powershell
+pnpm run dev
+# or
+pnpm run dev
+```
 
-   # Database
-   MONGODB_URI=mongodb://localhost:27017/chat-app
+Notes:
+- The repo uses `ts-node-dev` for development (`pnpm run dev`).
+- The provided `start` script currently runs the TypeScript source via `ts-node`.
+  For a production-ready start, build to JavaScript and run the output with Node (see Production below).
 
-   # JWT
-   JWT_SECRET=your-super-secret-jwt-key-here
-   JWT_EXPIRE=7d
+## 🔧 pnpm Scripts
 
-   # Logging
-   LOG_LEVEL=info
-   ```
+The `package.json` contains useful scripts you can run via `pnpm run <script>` or `pnpm run <script>`:
 
-4. **Start MongoDB**
-   ```bash
-   # Make sure MongoDB is running on your system
-   mongod
-   ```
+- `dev` - Start development server with hot reload (uses `ts-node-dev`).
+- `build` - Compile TypeScript into JavaScript (outputs to `dist` if configured in `tsconfig.json`).
+- `start` - Starts the server using `ts-node src/server.ts` (note: `ts-node` must be available).
+- `dev:build` - Run `tsc --watch` for continuous builds.
+- `clean` - Remove `dist` directory (`rimraf dist`).
+- `typecheck` - Run the TypeScript compiler with `--noEmit` to type-check the code.
+- `lint` / `lint:fix` - Run ESLint; `lint:fix` will attempt to fix issues.
+- `format` / `format:check` - Run Prettier to format or check formatting.
 
-## 🚀 Development
+If you plan to run in production, a recommended flow is:
 
-1. **Start the development server**
+```powershell
+pnpm run build
+node dist/server.js
+```
 
-   ```bash
-   npm run dev
-   ```
+(You may want to update the `start` script in `package.json` to `node dist/server.js` for production run.)
 
-2. **Build for production**
-   ```bash
-   npm run build
-   npm start
-   ```
+## � Development & Production
 
-## 📝 Available Scripts
+- Development: `pnpm run dev` (fast feedback with restarts)
+- Production (recommended):
+  1. `pnpm run build`
+  2. `node dist/server.js` (or update `start` script to this command)
 
-- `npm run dev` - Start development server with hot reload
-- `npm run build` - Build TypeScript to JavaScript
-- `npm start` - Start production server
-- `npm run clean` - Clean build directory
+## 📝 API Endpoints (high level)
 
-## 🔧 API Endpoints
+These are the endpoints the app aims to expose. Check each route file under `src/modules` for exact request/response details.
 
 ### Health Check
 
-- `GET /api/health` - Server health status
+- GET /api/health — Server health/status
 
-### User Routes (Coming Soon)
+### Auth / User (examples)
 
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/login` - User login
-- `GET /api/users/profile` - Get user profile
-- `PUT /api/users/profile` - Update user profile
+- POST /api/auth/register — Register a new user
+- POST /api/auth/login — Log in and receive a JWT
+- GET /api/users/profile — Get authenticated user's profile
+- PUT /api/users/profile — Update authenticated user's profile
 
-### Chat Routes (Coming Soon)
+### Chat
 
-- `GET /api/chat/rooms` - Get chat rooms
-- `POST /api/chat/rooms` - Create chat room
-- `GET /api/chat/rooms/:id/messages` - Get room messages
+- GET /api/chat/rooms — List chat rooms
+- POST /api/chat/rooms — Create a chat room
+- GET /api/chat/rooms/:id/messages — Get messages for a room
 
 ## 🔌 Socket.IO Events
 
-### Client to Server
+Client -> Server:
+- `join_room` — Join a chat room
+- `leave_room` — Leave a chat room
+- `send_message` — Send a message to a room
+- `typing_start` / `typing_stop` — Indicate typing status
 
-- `join_room` - Join a chat room
-- `leave_room` - Leave a chat room
-- `send_message` - Send a message
-- `typing_start` - User started typing
-- `typing_stop` - User stopped typing
+Server -> Client:
+- `message_received` — New message delivered
+- `user_joined` / `user_left` — Presence updates
+- `user_typing` / `user_stopped_typing` — Typing indicators
 
-### Server to Client
+## 🛡️ Security & Validation
 
-- `message_received` - New message received
-- `user_joined` - User joined room
-- `user_left` - User left room
-- `user_typing` - User is typing
-- `user_stopped_typing` - User stopped typing
-
-## 🛡️ Security Features
-
-- **Helmet** - Security headers
-- **CORS** - Cross-origin resource sharing
-- **Rate Limiting** - Prevent abuse
-- **JWT Authentication** - Secure token-based auth
-- **Password Hashing** - bcrypt with salt
-- **Input Validation** - express-validator
-- **File Upload Security** - File type and size limits
+- Helmet for security headers
+- CORS configured to allow the client origin
+- Rate limiting to protect endpoints
+- JWT-based authentication for protected routes
+- Password hashing with bcryptjs
+- Input validation using express-validator
 
 ## 📊 Logging
 
-The application uses **Pino** for structured logging:
-
-- **Request logging** - HTTP requests with timing
-- **Error logging** - Detailed error information
-- **Application logging** - Server startup and events
-
-Log levels: `debug`, `info`, `warn`, `error`
-
-## 🗄️ Database Schema
-
-### User Model
-
-```typescript
-{
-  username: string (unique, required)
-  email: string (unique, required)
-  password: string (hashed, required)
-  avatar?: string
-  isOnline: boolean
-  lastSeen: Date
-  createdAt: Date
-  updatedAt: Date
-}
-```
-
-## 🚀 Deployment
-
-1. **Build the application**
-
-   ```bash
-   npm run build
-   ```
-
-2. **Set production environment variables**
-
-   ```env
-   NODE_ENV=production
-   MONGODB_URI=your-production-mongodb-uri
-   JWT_SECRET=your-production-jwt-secret
-   ```
-
-3. **Start the server**
-   ```bash
-   npm start
-   ```
+The application uses Pino for structured logs. Typical log levels: `debug`, `info`, `warn`, `error`.
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+3. Implement your change and add tests where appropriate
+4. Run lint/format and ensure types pass: `pnpm run lint && pnpm run format && pnpm run typecheck`
+5. Open a Pull Request
 
 ## 📄 License
 
 This project is licensed under the ISC License.
-
-## 🆘 Support
-
-If you encounter any issues or have questions, please open an issue on GitHub.
-
----
-
-**Happy Coding! 🎉**
