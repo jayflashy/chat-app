@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import type { Secret, SignOptions } from 'jsonwebtoken';
 
 import type {
   ILoginRequest,
@@ -159,12 +160,13 @@ export class AuthService {
    * Generate JWT token
    */
   static generateToken(payload: IAuthPayload): string {
-    const secret = process.env.JWT_SECRET;
-    if (!secret) {
+    const secretEnv = process.env.JWT_SECRET;
+    if (!secretEnv) {
       throw new Error('JWT_SECRET is not defined');
     }
 
-    const expiresIn = process.env.JWT_EXPIRE || '7d';
+    const secret: Secret = secretEnv;
+    const expiresIn: NonNullable<SignOptions['expiresIn']> = (process.env.JWT_EXPIRE ?? '7d') as unknown as NonNullable<SignOptions['expiresIn']>;
 
     return jwt.sign(payload, secret, { expiresIn });
   }
